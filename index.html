@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KubeDrill packages</title>
+<style>body{font:16px/1.5 system-ui,sans-serif;max-width:760px;margin:2rem auto;padding:0 1rem;color:#1f2328}
+pre{background:#f6f8fa;padding:1rem;overflow-x:auto;border-radius:6px}code{font-size:14px}</style></head>
+<body>
+<h1>KubeDrill package repositories</h1>
+<p>Local Kubernetes simulator: practice kubectl without a cluster.
+Source, documentation and issues: <a href="https://github.com/itdrills/kubedrill">github.com/itdrills/kubedrill</a>.</p>
+<h2>Debian / Ubuntu (apt)</h2>
+<pre><code>sudo install -d -m 0755 /etc/apt/keyrings
+curl -fsSL https://itdrills.github.io/kubedrill/gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubedrill.gpg
+echo "deb [signed-by=/etc/apt/keyrings/kubedrill.gpg] https://itdrills.github.io/kubedrill/deb stable main" \
+  | sudo tee /etc/apt/sources.list.d/kubedrill.list
+sudo apt update &amp;&amp; sudo apt install kubedrill</code></pre>
+<h2>Fedora / RHEL / Rocky / Alma (dnf)</h2>
+<pre><code>sudo curl -fsSL -o /etc/yum.repos.d/kubedrill.repo https://itdrills.github.io/kubedrill/kubedrill.repo
+sudo dnf install kubedrill</code></pre>
+<h2>macOS (Homebrew)</h2>
+<pre><code>brew install itdrills/tap/kubedrill</code></pre>
+<p>Signing key: <a href="gpg.key">gpg.key</a> (fingerprint <code>0EF13CFA5BCD29E0E6CEB534B33172973C01772D</code>).</p>
+</body></html>

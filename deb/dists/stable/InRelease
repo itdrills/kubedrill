@@ -1,0 +1,47 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+Architectures: amd64 arm64
+Codename: stable
+Components: main
+Date: Mon, 23 Nov 2026 15:21:18 +0000
+Description: KubeDrill - local Kubernetes simulator
+Label: KubeDrill
+Origin: ITDrills
+Suite: stable
+MD5Sum:
+ 9a1e2a7c006c279e5d1671e0673f960a              837 main/binary-amd64/Packages
+ 2c14d47d7711cdc61f05a97e6163f2ec              553 main/binary-amd64/Packages.gz
+ 8c7634620baa40cd7fe4465d8bd03c03              837 main/binary-arm64/Packages
+ cf51fbfcd67424922d6873454159940e              553 main/binary-arm64/Packages.gz
+SHA1:
+ f9b8f3848b0261fe7fc050f8ada1bebf5ea99f59              837 main/binary-amd64/Packages
+ baaf4244468a0513f451f11fedf1b972c41e0b1d              553 main/binary-amd64/Packages.gz
+ f35b0be800b701106d1f9b8151df61dbc9ded760              837 main/binary-arm64/Packages
+ 3acdd01fdba6d4a056637053b8bf45c753bc8be1              553 main/binary-arm64/Packages.gz
+SHA256:
+ d0c3a3dfffd3256623a7829a13275f589b526a7b5dd3c547633eb24dee909a91              837 main/binary-amd64/Packages
+ 88b31b5f1b30b53228480ccaf6a3b8b4aab7a970b795896f0d7caf2fa9185d67              553 main/binary-amd64/Packages.gz
+ 9524327fa3c795e9a338a663fd62232d0fcb353e2d489faf5c566302580dd4df              837 main/binary-arm64/Packages
+ 1771fd11a48dccc788b069aabde9f3e0a1def914df48638ca5046ecfa370686d              553 main/binary-arm64/Packages.gz
+SHA512:
+ cdadf1787d1aa397d0ba01bd63df0d13b7d930980d6a3a8960be7ab6fac5ff50bbbe9dd6bfe412a55d3431777f70387a09088229bad9958f3b4d9cec5fab1902              837 main/binary-amd64/Packages
+ d1bbabb2b9e3c994e0d5258f7851eb2c62d53e31598d921ccf216558bb3c0f0b181dae0cf3f42cdf7a2a91a23ec0fb8a9e2bf9712f467fab767eaeed87793a72              553 main/binary-amd64/Packages.gz
+ 2490a3e03919efa43b1655236d7ee9f839d25573e7e5c9854214e2cacbcdf2bf1a53020f53074018e426c3bde74db7d6868d2b8421e505e76ba6636df3af902c              837 main/binary-arm64/Packages
+ 6951a7bdc675168b75dd090e37d248bbd72faab9584d38619041b855aaf1c9250f8618d5c740df21251c61ed44a28140001c46e8b7375a10c97be9807158c604              553 main/binary-arm64/Packages.gz
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAEBCgAdFiEEDvE8+lvNKeDmzrU0szFylzwBdy0FAmsEWe4ACgkQszFylzwB
+dy0vYRAArPS6Gqtmo3hudXeHoI35ZSjw3ni7vsJ0VR5X0O6eRNTNMOxpcYmrJAN+
+pjOXqxLdpj9rJ+H6REHlZVqu2mCLMgCTu05IASQo8pRaQ4FSneRTEE7/zGFHtlxr
+4hOJSkw2HPz6ihv3P2ZWdkQVskFnKfBF4ZReUnorhuiH5S25t0ECtWChuxmjRkz9
+lxr6lz4LqEt95Cd8qH+FRQbwUn3pdDiAcNDoNC64DaaKefVqV7QEiQ5WJ3uSqoP0
+bfuyvAoAKeRJ3dk8+koFLG7FpzMVlmdP9ScUc9NDBXeeMhs7v+v2fmQo4kJyscj0
+QK6DUWeLC+oX6hWRDtIq1tEsvJpIeEwc8dq05la3Omr1gpKEKo69frK/CPWgtSsm
+YzUiwxx6Tz6wG3FkX3I8oLTeinO1g3SJVTaToNBK1MtKTxUqzNz2XWSL7bwIPx46
+TLQKuttp1y9z5K5DKYFHWIPMf7Y7DFARxReXixniyW4jK/VcxInrbEhfaM/6gN6y
+MH36VPk5GB9i6zNxb96NWJNrpcjJtmRnKgptz/LobkEyy7ZsDJ811576gMG+L9Au
+0tELMfmeQLI0U4dPvf+3Stzt/W342t4fc7wPyngUr/IHTMhVi28ZoDoUkYATL6fM
+2NOsDxmW/ZtsU6gbQOM74b4jb0KiqKgR8HV5QTT7cL7NPofkhcI=
+=DFcg
+-----END PGP SIGNATURE-----

@@ -1,0 +1,19 @@
+Package: kubedrill
+Architecture: amd64
+Version: 0.1.0
+Priority: optional
+Section: devel
+Maintainer: ITDrills maintainers (https://github.com/itdrills/kubedrill/issues)
+Installed-Size: 28145
+Suggests: kubectl
+Filename: pool/main/kubedrill_0.1.0_amd64.deb
+Size: 9848558
+MD5sum: dc737a6bf7350764ad6d549a6b6384c4
+SHA1: b5196845d0681d0b981790e4d43b5508389df85a
+SHA256: 3f10c689263ef82fc3983ed6158e22d8f3b24fc1c8af2ddda29921462072e97d
+SHA512: 241c979837b6f47a89eae186e72d65e87f3af3e54923c9e757750ab7234c5c41f3a27828cead6d7420cd8b28387acb02ad581bd044ff12dea52895fe4d8e84ef
+Homepage: https://github.com/itdrills/kubedrill
+Description: Local Kubernetes simulator: practice kubectl without a cluster.
+ Use the real kubectl against a simulated cluster (no containers, no VMs)
+ and train troubleshooting with built-in challenges, hints and checks.
+
