@@ -25,11 +25,18 @@ type app struct {
 	home daemon.Home
 	out  io.Writer
 	err  io.Writer
+	// inUI is set when the browser UI runs the command; it always targets the
+	// simulator, so kubeconfig context hints would only confuse.
+	inUI bool
 }
 
 // NewRoot builds the command tree.
-func NewRoot() *cobra.Command {
-	a := &app{out: os.Stdout, err: os.Stderr}
+func NewRoot() *cobra.Command { return newRoot(os.Stdout, os.Stderr, false) }
+
+// newRoot builds the command tree writing to out and errOut (the browser UI
+// runs commands in-process with buffers).
+func newRoot(out, errOut io.Writer, inUI bool) *cobra.Command {
+	a := &app{out: out, err: errOut, inUI: inUI}
 	root := &cobra.Command{
 		Use:   brand.Binary,
 		Short: brand.Name + " – " + brand.Claim,
@@ -52,7 +59,8 @@ troubleshooting with built-in challenges, graded hints and automatic checks.`,
 	root.SetOut(a.out)
 	root.SetErr(a.err)
 	root.AddCommand(a.startCmd(), a.stopCmd(), a.statusCmd(), a.resetCmd(), a.serveCmd(),
-		a.kubectlCmd(), a.kubeconfigCmd(), a.challengeCmd(), a.hintCmd(), a.solveCmd(), a.versionCmd(), a.doctorCmd())
+		a.kubectlCmd(), a.kubeconfigCmd(), a.challengeCmd(), a.hintCmd(), a.solveCmd(), a.versionCmd(), a.doctorCmd(),
+		a.uiCmd())
 	return root
 }
 
@@ -137,6 +145,9 @@ func (a *app) call(method, path string, body, out any) error {
 
 // contextNotice warns when plain `kubectl` would talk to another cluster.
 func (a *app) contextNotice(si *daemon.ServerInfo) {
+	if a.inUI {
+		return
+	}
 	st := kubeconfig.Inspect()
 	switch {
 	case !st.HasContext:

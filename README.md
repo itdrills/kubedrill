@@ -46,6 +46,7 @@ and KubeDrill works completely offline.
 - [Quick start](#quick-start)
 - [Working with the simulated cluster](#working-with-the-simulated-cluster)
 - [Challenges](#challenges)
+- [Browser UI](#browser-ui)
 - [Safety: your real clusters stay untouched](#safety-your-real-clusters-stay-untouched)
 - [Command reference](#command-reference)
 - [Supported subset](#supported-subset)
@@ -204,6 +205,45 @@ kubedrill challenge stop                       # end and restore the state befor
 Challenges check the **end state** of the cluster, not the commands you typed –
 any correct fix counts.
 
+## Browser UI
+
+Prefer a browser over the terminal? With the simulator running:
+
+```sh
+kubedrill ui            # prints a link and opens it in your default browser
+kubedrill ui --no-open  # only print the link
+```
+
+The page shows a command line, the task of the active challenge with the live
+state of its success criteria, and buttons for hint, check, reset, solve and
+stop. Clicking a challenge in the list starts it. Every button runs the same
+command you would type (`kubedrill hint`, `kubedrill challenge check`, …), so
+you learn the CLI along the way. Stop the UI with Ctrl+C; the simulator keeps
+running.
+
+The command line is **not a shell**. It accepts `kubectl …` with the common
+subcommands (get, describe, logs, create, apply, delete, patch, set, scale,
+rollout, …) and `kubedrill challenge|hint|solve|status`. Pipes, redirects,
+variables, `exec`, `port-forward`, `edit`, plugins, watches (`-w`, `logs -f`)
+and flags that point kubectl elsewhere (`--context`, `--kubeconfig`, …) are
+refused – use your own terminal for those.
+
+How the page is protected:
+
+- It listens on **127.0.0.1 only**, on a free port (or `--port`).
+- The printed link carries a **random one-time token**. Opening it sets a
+  `HttpOnly`, `SameSite=Strict` cookie and removes the token from the address
+  bar; requests without the cookie get `401`. Don't share the link.
+- Requests must name `127.0.0.1:<port>` or `localhost:<port>` in the `Host`
+  header (protects against DNS rebinding), and commands are only accepted from
+  the page's own origin. No CORS headers are sent, so other websites cannot
+  read or drive the UI.
+- A strict Content Security Policy allows only the page's own embedded files.
+  The page loads nothing from the internet; HTML, CSS and JavaScript are
+  embedded in the binary.
+- Commands are split without a shell and run with the simulator's kubeconfig
+  and context only, with a 30-second timeout.
+
 ## Safety: your real clusters stay untouched
 
 - The API server binds to **127.0.0.1 only** and serves HTTPS with a CA generated
@@ -250,6 +290,7 @@ Files in `~/.kubedrill` (override with `KUBEDRILL_HOME`): `kubeconfig`, `server.
 | `kubedrill challenge validate <file\|dir>...` | Strictly validate scenario YAML files (offline) |
 | `kubedrill hint [--level N]` | Show the next (or a specific) hint |
 | `kubedrill solve` | Show diagnosis, root cause, fix and commands – the cluster is **not** changed and the result is recorded as "completed with help" |
+| `kubedrill ui [--port 0] [--no-open]` | Browser UI on 127.0.0.1: command line, challenge task, hints and check ([details](#browser-ui)) |
 | `kubedrill doctor` | Check kubectl, server and kubeconfig setup |
 | `kubedrill version` | Print versions |
 
