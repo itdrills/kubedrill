@@ -42,7 +42,8 @@ jobs:
         run: make vet && test -z "$(gofmt -l cmd internal test)"
       - uses: golangci/golangci-lint-action@v8
         with:
-          version: latest
+          version: v2.15.0   # keep in sync with GOLANGCI_LINT_VERSION in the Makefile
+          args: --build-tags e2e
 
   package:
     runs-on: ubuntu-latest

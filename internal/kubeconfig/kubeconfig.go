@@ -19,7 +19,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 
-	"github.com/itskills/kubedrill/internal/brand"
+	"github.com/itdrills/kubedrill/internal/brand"
 )
 
 // Entry describes how to reach the simulator.

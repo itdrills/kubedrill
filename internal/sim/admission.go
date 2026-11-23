@@ -17,7 +17,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/utils/ptr"
 
-	"github.com/itskills/kubedrill/internal/registry"
+	"github.com/itdrills/kubedrill/internal/registry"
 )
 
 // setDefaults applies the subset of API server defaulting relevant for the

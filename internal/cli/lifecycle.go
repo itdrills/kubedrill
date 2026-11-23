@@ -14,10 +14,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/itskills/kubedrill/internal/brand"
-	"github.com/itskills/kubedrill/internal/daemon"
-	"github.com/itskills/kubedrill/internal/kubeconfig"
-	"github.com/itskills/kubedrill/internal/sim"
+	"github.com/itdrills/kubedrill/internal/brand"
+	"github.com/itdrills/kubedrill/internal/daemon"
+	"github.com/itdrills/kubedrill/internal/kubeconfig"
+	"github.com/itdrills/kubedrill/internal/sim"
 )
 
 func (a *app) startCmd() *cobra.Command {

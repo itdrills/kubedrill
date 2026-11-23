@@ -1,4 +1,4 @@
-module github.com/itskills/kubedrill
+module github.com/itdrills/kubedrill
 
 go 1.27.4
 

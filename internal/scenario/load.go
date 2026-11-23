@@ -16,8 +16,8 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"sigs.k8s.io/yaml"
 
-	"github.com/itskills/kubedrill/internal/brand"
-	"github.com/itskills/kubedrill/internal/registry"
+	"github.com/itdrills/kubedrill/internal/brand"
+	"github.com/itdrills/kubedrill/internal/registry"
 )
 
 //go:embed builtin/*.yaml

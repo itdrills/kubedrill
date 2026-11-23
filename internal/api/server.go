@@ -19,9 +19,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	"github.com/itskills/kubedrill/internal/brand"
-	"github.com/itskills/kubedrill/internal/registry"
-	"github.com/itskills/kubedrill/internal/sim"
+	"github.com/itdrills/kubedrill/internal/brand"
+	"github.com/itdrills/kubedrill/internal/registry"
+	"github.com/itdrills/kubedrill/internal/sim"
 )
 
 // maxBody limits request bodies (manifests) to 4 MiB.

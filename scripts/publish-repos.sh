@@ -7,7 +7,7 @@
 # Environment:
 #   GPG_KEY_ID        fingerprint of the signing key (already in the keyring)
 #   GPG_PASSPHRASE    passphrase of the key (optional)
-#   SITE_URL          public URL of the site (default https://itskills.github.io/kubedrill)
+#   SITE_URL          public URL of the site (default https://itdrills.github.io/kubedrill)
 #   KEEP_VERSIONS     how many versions to keep in the repositories (default 5)
 #   FORMATS           "deb rpm" (default) or a subset, e.g. for local tests
 #
@@ -23,7 +23,7 @@ set -euo pipefail
 PKG_DIR="${1:?packages dir required}"
 SITE="${2:?site dir required}"
 : "${GPG_KEY_ID:?GPG_KEY_ID required}"
-SITE_URL="${SITE_URL:-https://itskills.github.io/kubedrill}"
+SITE_URL="${SITE_URL:-https://itdrills.github.io/kubedrill}"
 KEEP_VERSIONS="${KEEP_VERSIONS:-5}"
 FORMATS="${FORMATS:-deb rpm}"
 
@@ -71,7 +71,7 @@ if [[ " $FORMATS " == *" deb "* ]]; then
       gzip -9nkf "$d/Packages"
     done
     apt-ftparchive \
-      -o APT::FTPArchive::Release::Origin=ITSkills \
+      -o APT::FTPArchive::Release::Origin=ITDrills \
       -o APT::FTPArchive::Release::Label=KubeDrill \
       -o APT::FTPArchive::Release::Suite=stable \
       -o APT::FTPArchive::Release::Codename=stable \
@@ -112,7 +112,7 @@ pre{background:#f6f8fa;padding:1rem;overflow-x:auto;border-radius:6px}code{font-
 <body>
 <h1>KubeDrill package repositories</h1>
 <p>Local Kubernetes simulator: practice kubectl without a cluster.
-Source, documentation and issues: <a href="https://github.com/itskills/kubedrill">github.com/itskills/kubedrill</a>.</p>
+Source, documentation and issues: <a href="https://github.com/itdrills/kubedrill">github.com/itdrills/kubedrill</a>.</p>
 <h2>Debian / Ubuntu (apt)</h2>
 <pre><code>sudo install -d -m 0755 /etc/apt/keyrings
 curl -fsSL $SITE_URL/gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubedrill.gpg
@@ -123,7 +123,7 @@ sudo apt update &amp;&amp; sudo apt install kubedrill</code></pre>
 <pre><code>sudo curl -fsSL -o /etc/yum.repos.d/kubedrill.repo $SITE_URL/kubedrill.repo
 sudo dnf install kubedrill</code></pre>
 <h2>macOS (Homebrew)</h2>
-<pre><code>brew install itskills/tap/kubedrill</code></pre>
+<pre><code>brew install itdrills/tap/kubedrill</code></pre>
 <p>Signing key: <a href="gpg.key">gpg.key</a> (fingerprint <code>$GPG_KEY_ID</code>).</p>
 </body></html>
 EOF

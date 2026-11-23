@@ -10,7 +10,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/itskills/kubedrill/internal/brand"
+	"github.com/itdrills/kubedrill/internal/brand"
 )
 
 // ErrNotRunning means no simulator server is running for this home.
@@ -29,7 +29,7 @@ func (h Home) Probe(si *ServerInfo) (*Info, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("unexpected status %s from %s", resp.Status, si.Address)
 	}
@@ -87,7 +87,7 @@ func (h Home) StartBackground(serveArgs []string, timeout time.Duration) (*Serve
 	if err != nil {
 		return nil, err
 	}
-	defer logf.Close()
+	defer func() { _ = logf.Close() }() // the child keeps its own descriptor
 	cmd := exec.Command(exe, append([]string{"serve"}, serveArgs...)...)
 	cmd.Env = append(os.Environ(), brand.HomeEnv+"="+h.Dir)
 	cmd.Stdout = logf

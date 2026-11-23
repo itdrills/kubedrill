@@ -41,9 +41,9 @@ nfpms:
     package_name: kubedrill
     file_name_template: "{{ .ConventionalFileName }}"
     formats: [deb, rpm]
-    vendor: ITSkills
-    homepage: https://github.com/itskills/kubedrill
-    maintainer: "ITSkills maintainers (https://github.com/itskills/kubedrill/issues)"
+    vendor: ITDrills
+    homepage: https://github.com/itdrills/kubedrill
+    maintainer: "ITDrills maintainers (https://github.com/itdrills/kubedrill/issues)"
     description: |-
       Local Kubernetes simulator: practice kubectl without a cluster.
       Use the real kubectl against a simulated cluster (no containers, no VMs)
@@ -68,21 +68,21 @@ nfpms:
         # (local snapshot builds). Passphrase: $NFPM_PASSPHRASE.
         key_file: '{{ if index .Env "GPG_KEY_FILE" }}{{ .Env.GPG_KEY_FILE }}{{ end }}'
 
-# Homebrew cask in https://github.com/itskills/homebrew-tap
-#   brew install itskills/tap/kubedrill
+# Homebrew cask in https://github.com/itdrills/homebrew-tap
+#   brew install itdrills/tap/kubedrill
 homebrew_casks:
   - name: kubedrill
     repository:
-      owner: itskills
+      owner: itdrills
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
     directory: Casks
-    homepage: https://github.com/itskills/kubedrill
+    homepage: https://github.com/itdrills/kubedrill
     description: "Local Kubernetes simulator: practice kubectl without a cluster"
     license: Apache-2.0
     binaries: [kubedrill]
     commit_author:
-      name: itskills-release-bot
+      name: itdrills-release-bot
       email: kubedrill-release@users.noreply.github.com
     # kubectl is deliberately not a dependency: many users manage it with other
     # tools (asdf, mise, gcloud, Docker Desktop). `kubedrill doctor` checks it.
@@ -104,15 +104,15 @@ homebrew_casks:
 
 release:
   github:
-    owner: itskills
+    owner: itdrills
     name: kubedrill
   footer: |
     ## Install
 
     ```sh
-    brew install itskills/tap/kubedrill          # macOS
+    brew install itdrills/tap/kubedrill          # macOS
     ```
-    apt (Debian/Ubuntu) and dnf (Fedora/RHEL): see https://itskills.github.io/kubedrill/
+    apt (Debian/Ubuntu) and dnf (Fedora/RHEL): see https://itdrills.github.io/kubedrill/
 
 changelog:
   use: github

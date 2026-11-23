@@ -20,7 +20,7 @@ const (
 	// AdminPathPrefix is the URL prefix of the simulator's own admin API.
 	AdminPathPrefix = "/kubedrill/v1"
 	// ScenarioAPIVersion is the apiVersion of scenario documents.
-	ScenarioAPIVersion = "itskills.github.io/v1alpha1"
+	ScenarioAPIVersion = "itdrills.github.io/v1alpha1"
 	// DefaultPort is the default loopback port of the simulated API server.
 	DefaultPort = 16443
 )

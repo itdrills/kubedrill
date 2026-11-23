@@ -20,8 +20,8 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	"github.com/itskills/kubedrill/internal/registry"
-	"github.com/itskills/kubedrill/internal/sim"
+	"github.com/itdrills/kubedrill/internal/registry"
+	"github.com/itdrills/kubedrill/internal/sim"
 )
 
 const (

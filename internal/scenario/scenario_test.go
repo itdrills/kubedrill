@@ -13,8 +13,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	"github.com/itskills/kubedrill/internal/registry"
-	"github.com/itskills/kubedrill/internal/sim"
+	"github.com/itdrills/kubedrill/internal/registry"
+	"github.com/itdrills/kubedrill/internal/sim"
 )
 
 func newEngine(t *testing.T) (*Engine, *sim.FakeClock) {
@@ -63,11 +63,11 @@ func TestBuiltinScenariosValid(t *testing.T) {
 }
 
 func TestValidationErrorsAreReadable(t *testing.T) {
-	_, err := Parse([]byte("apiVersion: itskills.github.io/v1alpha1\nkind: Scenario\nmetadata:\n  id: Bad_ID\n  difficulty: hard\nspec:\n  hints: []\n  sucess: []\n"), "bad.yaml")
+	_, err := Parse([]byte("apiVersion: itdrills.github.io/v1alpha1\nkind: Scenario\nmetadata:\n  id: Bad_ID\n  difficulty: hard\nspec:\n  hints: []\n  sucess: []\n"), "bad.yaml")
 	if err == nil || !strings.Contains(err.Error(), "unknown field") {
 		t.Fatalf("expected unknown field error, got %v", err)
 	}
-	_, err = Parse([]byte("apiVersion: itskills.github.io/v1alpha1\nkind: Scenario\nmetadata:\n  id: Bad_ID\n  difficulty: hard\nspec:\n  hints: []\n"), "bad.yaml")
+	_, err = Parse([]byte("apiVersion: itdrills.github.io/v1alpha1\nkind: Scenario\nmetadata:\n  id: Bad_ID\n  difficulty: hard\nspec:\n  hints: []\n"), "bad.yaml")
 	for _, want := range []string{"metadata.id", "difficulty", "spec.hints", "spec.success", "spec.target or spec.setup"} {
 		if err == nil || !strings.Contains(err.Error(), want) {
 			t.Fatalf("expected %q in %v", want, err)

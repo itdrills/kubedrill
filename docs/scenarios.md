@@ -39,7 +39,7 @@ shown by `kubedrill challenge list`; the other scenarios keep working.
 ## Reference
 
 ```yaml
-apiVersion: itskills.github.io/v1alpha1     # required
+apiVersion: itdrills.github.io/v1alpha1     # required
 kind: Scenario                      # required
 metadata:
   id: my-broken-app                 # required, lowercase, digits, dashes (<= 63)

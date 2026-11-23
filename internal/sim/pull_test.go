@@ -8,7 +8,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/itskills/kubedrill/internal/imagecheck"
+	"github.com/itdrills/kubedrill/internal/imagecheck"
 )
 
 // fakeVerifier answers lookups from a table; unknown references stay

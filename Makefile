@@ -27,11 +27,11 @@ vet: ## go vet (including the e2e build tag)
 	$(GO) vet ./...
 	$(GO) vet -tags e2e ./test/e2e/
 
-lint: vet ## gofmt check + go vet + golangci-lint/staticcheck when installed
+GOLANGCI_LINT_VERSION ?= v2.15.0
+
+lint: vet ## gofmt check + go vet + golangci-lint (same pinned version as CI)
 	@out=$$(gofmt -l cmd internal test); if [ -n "$$out" ]; then echo "gofmt needed:"; echo "$$out"; exit 1; fi
-	@if command -v golangci-lint >/dev/null 2>&1; then golangci-lint run ./...; \
-	elif command -v staticcheck >/dev/null 2>&1; then staticcheck ./...; \
-	else echo "note: golangci-lint/staticcheck not installed; ran gofmt + go vet only (CI runs golangci-lint)"; fi
+	$(GO) run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION) run --build-tags e2e ./...
 
 package: ## Cross-compile release tarballs + checksums into dist/
 	./scripts/package.sh "$(VERSION)" "$(PLATFORMS)"

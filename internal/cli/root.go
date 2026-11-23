@@ -13,9 +13,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/itskills/kubedrill/internal/brand"
-	"github.com/itskills/kubedrill/internal/daemon"
-	"github.com/itskills/kubedrill/internal/kubeconfig"
+	"github.com/itdrills/kubedrill/internal/brand"
+	"github.com/itdrills/kubedrill/internal/daemon"
+	"github.com/itdrills/kubedrill/internal/kubeconfig"
 )
 
 // Version is set at build time via -ldflags.
@@ -74,7 +74,11 @@ type exitError struct{ code int }
 
 func (e *exitError) Error() string { return fmt.Sprintf("exit status %d", e.code) }
 
-func (a *app) printf(format string, args ...any) { fmt.Fprintf(a.out, format, args...) }
+// printf and eprintf write to the terminal; a failing write to stdout/stderr
+// cannot be reported anywhere, so the error is deliberately ignored.
+func (a *app) printf(format string, args ...any) { _, _ = fmt.Fprintf(a.out, format, args...) }
+
+func (a *app) eprintf(format string, args ...any) { _, _ = fmt.Fprintf(a.err, format, args...) }
 
 // ---------------------------------------------------------------------------
 // Admin API client. It only ever talks to the server recorded in the
@@ -116,7 +120,7 @@ func (a *app) call(method, path string, body, out any) error {
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	data, _ := io.ReadAll(resp.Body)
 	if resp.StatusCode >= 300 {
 		var e daemon.ErrorResponse
@@ -136,14 +140,14 @@ func (a *app) contextNotice(si *daemon.ServerInfo) {
 	st := kubeconfig.Inspect()
 	switch {
 	case !st.HasContext:
-		fmt.Fprintf(a.err, "Note: no %q context in %s. Use `%s kubectl ...` or run `%s kubeconfig merge`.\n", brand.ContextName, st.Path, brand.Binary, brand.Binary)
+		a.eprintf("Note: no %q context in %s. Use `%s kubectl ...` or run `%s kubeconfig merge`.\n", brand.ContextName, st.Path, brand.Binary, brand.Binary)
 	case st.ContextServer != si.URL():
-		fmt.Fprintf(a.err, "Warning: context %q points to %s, but the simulator runs on %s. Run `%s kubeconfig merge` to update it.\n", brand.ContextName, st.ContextServer, si.URL(), brand.Binary)
+		a.eprintf("Warning: context %q points to %s, but the simulator runs on %s. Run `%s kubeconfig merge` to update it.\n", brand.ContextName, st.ContextServer, si.URL(), brand.Binary)
 	case st.CurrentContext != brand.ContextName:
 		cur := st.CurrentContext
 		if cur == "" {
 			cur = "<none>"
 		}
-		fmt.Fprintf(a.err, "Safety: your current kubectl context is %q. Always add `--context %s` (or use `%s kubectl ...`) so commands reach the simulator, not a real cluster.\n", cur, brand.ContextName, brand.Binary)
+		a.eprintf("Safety: your current kubectl context is %q. Always add `--context %s` (or use `%s kubectl ...`) so commands reach the simulator, not a real cluster.\n", cur, brand.ContextName, brand.Binary)
 	}
 }

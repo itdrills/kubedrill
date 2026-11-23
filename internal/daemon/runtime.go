@@ -18,11 +18,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/itskills/kubedrill/internal/api"
-	"github.com/itskills/kubedrill/internal/brand"
-	"github.com/itskills/kubedrill/internal/imagecheck"
-	"github.com/itskills/kubedrill/internal/scenario"
-	"github.com/itskills/kubedrill/internal/sim"
+	"github.com/itdrills/kubedrill/internal/api"
+	"github.com/itdrills/kubedrill/internal/brand"
+	"github.com/itdrills/kubedrill/internal/imagecheck"
+	"github.com/itdrills/kubedrill/internal/scenario"
+	"github.com/itdrills/kubedrill/internal/sim"
 )
 
 // RunOptions configure the server process.
@@ -134,7 +134,7 @@ func Run(opts RunOptions) error {
 		TLSConfig: &tls.Config{Certificates: []tls.Certificate{cert}, MinVersion: tls.VersionTLS12},
 		ErrorLog:  log.New(io.Discard, "", 0)}
 	if err := opts.Home.WriteServerInfo(info); err != nil {
-		ln.Close()
+		_ = ln.Close()
 		return err
 	}
 	defer opts.Home.RemoveServerInfo(info.PID)

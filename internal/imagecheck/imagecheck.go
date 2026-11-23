@@ -204,15 +204,15 @@ func (c *Checker) Check(ctx context.Context, registry, repository, reference str
 			return Result{Status: Unreachable, Detail: err.Error()}
 		}
 	}
-	switch code := resp.StatusCode; {
-	case code == http.StatusOK:
+	switch resp.StatusCode {
+	case http.StatusOK:
 		return Result{Status: Exists, Digest: resp.Header.Get("Docker-Content-Digest")}
-	case code == http.StatusNotFound:
+	case http.StatusNotFound:
 		return Result{Status: NotFound, Detail: "manifest unknown"}
-	case code == http.StatusUnauthorized || code == http.StatusForbidden:
-		return Result{Status: Denied, Detail: fmt.Sprintf("registry answered %d", code)}
+	case http.StatusUnauthorized, http.StatusForbidden:
+		return Result{Status: Denied, Detail: fmt.Sprintf("registry answered %d", resp.StatusCode)}
 	default: // 429 (rate limit), 5xx, unexpected codes
-		return Result{Status: Unreachable, Detail: fmt.Sprintf("registry answered %d", code)}
+		return Result{Status: Unreachable, Detail: fmt.Sprintf("registry answered %d", resp.StatusCode)}
 	}
 }
 
@@ -265,7 +265,7 @@ func (c *Checker) token(ctx context.Context, challenge, repository string) (stri
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	switch {
 	case resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden:
 		return "", fmt.Errorf("%w: token request answered %d", errDenied, resp.StatusCode)

@@ -1,4 +1,4 @@
-apiVersion: itskills.github.io/v1alpha1
+apiVersion: itdrills.github.io/v1alpha1
 kind: Scenario
 metadata:
   id: image-pull-backoff

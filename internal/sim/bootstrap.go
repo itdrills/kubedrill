@@ -12,8 +12,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
 
-	"github.com/itskills/kubedrill/internal/brand"
-	"github.com/itskills/kubedrill/internal/registry"
+	"github.com/itdrills/kubedrill/internal/brand"
+	"github.com/itdrills/kubedrill/internal/registry"
 )
 
 // KubernetesVersion is the version reported by the simulated cluster.
@@ -138,7 +138,7 @@ func (c *Cluster) bootstrap() {
 		c.mustCreate(res("pods"), &corev1.Pod{
 			ObjectMeta: metav1.ObjectMeta{Name: comp.name + "-" + cp, Namespace: "kube-system",
 				Labels:      map[string]string{"component": comp.name, "tier": "control-plane"},
-				Annotations: map[string]string{"kubernetes.io/config.source": "file", "kubedrill.itskills.github.io/static": "true"}},
+				Annotations: map[string]string{"kubernetes.io/config.source": "file", "kubedrill.itdrills.github.io/static": "true"}},
 			Spec: corev1.PodSpec{
 				NodeName: cp, HostNetwork: true, PriorityClassName: "system-node-critical",
 				Tolerations: []corev1.Toleration{{Operator: corev1.TolerationOpExists, Effect: corev1.TaintEffectNoExecute}},
@@ -174,7 +174,7 @@ func (c *Cluster) newNode(n NodeSpec, idx int) *corev1.Node {
 	return &corev1.Node{
 		ObjectMeta: metav1.ObjectMeta{Name: n.Name, Labels: lbls, Annotations: map[string]string{
 			"node.alpha.kubernetes.io/ttl": "0", "volumes.kubernetes.io/controller-managed-attach-detach": "true",
-			"kubedrill.itskills.github.io/simulated": "true"}},
+			"kubedrill.itdrills.github.io/simulated": "true"}},
 		Spec: corev1.NodeSpec{PodCIDR: fmt.Sprintf("10.244.%d.0/24", idx), PodCIDRs: []string{fmt.Sprintf("10.244.%d.0/24", idx)},
 			ProviderID: "kubedrill://" + n.Name, Taints: taints},
 		Status: corev1.NodeStatus{

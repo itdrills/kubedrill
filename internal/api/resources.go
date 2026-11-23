@@ -27,7 +27,7 @@ import (
 	kjson "sigs.k8s.io/json"
 	"sigs.k8s.io/yaml"
 
-	"github.com/itskills/kubedrill/internal/registry"
+	"github.com/itdrills/kubedrill/internal/registry"
 )
 
 // request is a parsed resource request.
@@ -638,7 +638,7 @@ func (s *Server) serveScale(w http.ResponseWriter, r *http.Request, req *request
 	out, err := s.Cluster.Mutate(req.res, req.namespace, req.name, "", dryRun, func(cur runtime.Object) (runtime.Object, error) {
 		sc := toScale(cur)
 		orig, _ := json.Marshal(sc)
-		next := orig
+		var next []byte
 		switch {
 		case r.Method == http.MethodPut:
 			next = data

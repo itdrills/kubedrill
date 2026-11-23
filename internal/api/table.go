@@ -17,7 +17,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/duration"
 
-	"github.com/itskills/kubedrill/internal/registry"
+	"github.com/itdrills/kubedrill/internal/registry"
 )
 
 // wantsTable reports whether kubectl asked for server-side printing.

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/itskills/kubedrill/internal/imagecheck"
+	"github.com/itdrills/kubedrill/internal/imagecheck"
 )
 
 // ImageVerifier looks up image references in their real registry. The

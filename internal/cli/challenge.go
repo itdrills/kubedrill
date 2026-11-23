@@ -8,9 +8,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/itskills/kubedrill/internal/brand"
-	"github.com/itskills/kubedrill/internal/daemon"
-	"github.com/itskills/kubedrill/internal/scenario"
+	"github.com/itdrills/kubedrill/internal/brand"
+	"github.com/itdrills/kubedrill/internal/daemon"
+	"github.com/itdrills/kubedrill/internal/scenario"
 )
 
 func (a *app) challengeCmd() *cobra.Command {
@@ -29,7 +29,7 @@ func (a *app) challengeCmd() *cobra.Command {
 				return err
 			}
 			tw := tabwriter.NewWriter(a.out, 0, 2, 2, ' ', 0)
-			fmt.Fprintln(tw, "ID\tDIFFICULTY\tMIN\tSTATUS\tTITLE")
+			_, _ = fmt.Fprintln(tw, "ID\tDIFFICULTY\tMIN\tSTATUS\tTITLE")
 			for _, s := range c.Scenarios {
 				status := ""
 				if s.Solved {
@@ -38,11 +38,11 @@ func (a *app) challengeCmd() *cobra.Command {
 				if s.ID == c.Active {
 					status = "ACTIVE"
 				}
-				fmt.Fprintf(tw, "%s\t%s\t%d\t%s\t%s\n", s.ID, s.Difficulty, s.EstimatedMinutes, status, s.Title)
+				_, _ = fmt.Fprintf(tw, "%s\t%s\t%d\t%s\t%s\n", s.ID, s.Difficulty, s.EstimatedMinutes, status, s.Title)
 			}
 			_ = tw.Flush()
 			for _, w := range c.Warnings {
-				fmt.Fprintf(a.err, "warning: %s\n", w)
+				a.eprintf("warning: %s\n", w)
 			}
 			a.printf("\nStart one with `%s challenge start <id>`.\n", brand.Binary)
 			return nil
@@ -174,7 +174,7 @@ func (a *app) challengeCmd() *cobra.Command {
 					}
 					if err != nil {
 						failed++
-						fmt.Fprintf(a.err, "%v\n", err)
+						a.eprintf("%v\n", err)
 						continue
 					}
 					a.printf("ok   %s\n", f)

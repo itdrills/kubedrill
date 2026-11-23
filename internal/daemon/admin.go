@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/itskills/kubedrill/internal/brand"
-	"github.com/itskills/kubedrill/internal/scenario"
-	"github.com/itskills/kubedrill/internal/sim"
+	"github.com/itdrills/kubedrill/internal/brand"
+	"github.com/itdrills/kubedrill/internal/scenario"
+	"github.com/itdrills/kubedrill/internal/sim"
 )
 
 // Admin wire types shared with the CLI client.

@@ -2,8 +2,8 @@
 
 **Practice Kubernetes. No Cluster Required.**
 
-[![ci](https://github.com/itskills/kubedrill/actions/workflows/ci.yml/badge.svg)](https://github.com/itskills/kubedrill/actions/workflows/ci.yml)
-[![release](https://img.shields.io/github/v/release/itskills/kubedrill)](https://github.com/itskills/kubedrill/releases)
+[![ci](https://github.com/itdrills/kubedrill/actions/workflows/ci.yml/badge.svg)](https://github.com/itdrills/kubedrill/actions/workflows/ci.yml)
+[![release](https://img.shields.io/github/v/release/itdrills/kubedrill)](https://github.com/itdrills/kubedrill/releases)
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 
 KubeDrill is a lightweight, local Kubernetes *simulator*. You use the **real
@@ -36,7 +36,7 @@ anonymous `HEAD` requests that verify an image tag exists in its registry (see
 and KubeDrill works completely offline.
 
 > Status: early release (v0.x). Feedback and challenge ideas are welcome in the
-> [issues](https://github.com/itskills/kubedrill/issues).
+> [issues](https://github.com/itdrills/kubedrill/issues).
 
 ---
 
@@ -64,7 +64,7 @@ also need [`kubectl`](https://kubernetes.io/docs/tasks/tools/) in your `PATH`
 ### macOS – Homebrew
 
 ```sh
-brew install itskills/tap/kubedrill
+brew install itdrills/tap/kubedrill
 brew install kubectl        # if you do not have kubectl yet
 ```
 
@@ -74,9 +74,9 @@ Upgrade with `brew upgrade kubedrill`.
 
 ```sh
 sudo install -d -m 0755 /etc/apt/keyrings
-curl -fsSL https://itskills.github.io/kubedrill/gpg.key \
+curl -fsSL https://itdrills.github.io/kubedrill/gpg.key \
   | sudo gpg --dearmor -o /etc/apt/keyrings/kubedrill.gpg
-echo "deb [signed-by=/etc/apt/keyrings/kubedrill.gpg] https://itskills.github.io/kubedrill/deb stable main" \
+echo "deb [signed-by=/etc/apt/keyrings/kubedrill.gpg] https://itdrills.github.io/kubedrill/deb stable main" \
   | sudo tee /etc/apt/sources.list.d/kubedrill.list
 sudo apt update
 sudo apt install kubedrill
@@ -88,7 +88,7 @@ packages whose signature does not match the key.
 ### Fedora / RHEL / Rocky / Alma – dnf
 
 ```sh
-sudo curl -fsSL -o /etc/yum.repos.d/kubedrill.repo https://itskills.github.io/kubedrill/kubedrill.repo
+sudo curl -fsSL -o /etc/yum.repos.d/kubedrill.repo https://itdrills.github.io/kubedrill/kubedrill.repo
 sudo dnf install kubedrill
 ```
 
@@ -98,15 +98,15 @@ dnf asks you to confirm the signing key on first install. Updates arrive with
 ### Any Linux or macOS – binary download
 
 Download the archive for your platform from the
-[releases page](https://github.com/itskills/kubedrill/releases), verify it
+[releases page](https://github.com/itdrills/kubedrill/releases), verify it
 against `checksums.txt` and put the binary into your `PATH`:
 
 ```sh
 VERSION=0.1.0   # see the releases page
 OS=linux        # or darwin
 ARCH=amd64      # or arm64
-curl -fsSLO "https://github.com/itskills/kubedrill/releases/download/v${VERSION}/kubedrill_${VERSION}_${OS}_${ARCH}.tar.gz"
-curl -fsSLO "https://github.com/itskills/kubedrill/releases/download/v${VERSION}/checksums.txt"
+curl -fsSLO "https://github.com/itdrills/kubedrill/releases/download/v${VERSION}/kubedrill_${VERSION}_${OS}_${ARCH}.tar.gz"
+curl -fsSLO "https://github.com/itdrills/kubedrill/releases/download/v${VERSION}/checksums.txt"
 sha256sum --ignore-missing -c checksums.txt     # macOS: shasum -a 256 --ignore-missing -c checksums.txt
 tar -xzf "kubedrill_${VERSION}_${OS}_${ARCH}.tar.gz" kubedrill
 sudo install -m 0755 kubedrill /usr/local/bin/kubedrill
@@ -117,7 +117,7 @@ sudo install -m 0755 kubedrill /usr/local/bin/kubedrill
 With Go 1.27.4 or newer (older Go versions download the required toolchain automatically):
 
 ```sh
-go install github.com/itskills/kubedrill/cmd/kubedrill@latest
+go install github.com/itdrills/kubedrill/cmd/kubedrill@latest
 ```
 
 or clone the repository and run `make build` (binary in `bin/kubedrill`).

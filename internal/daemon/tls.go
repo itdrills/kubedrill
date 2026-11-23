@@ -17,7 +17,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/itskills/kubedrill/internal/brand"
+	"github.com/itdrills/kubedrill/internal/brand"
 )
 
 // The simulator serves HTTPS with a locally generated CA because kubectl

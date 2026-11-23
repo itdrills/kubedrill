@@ -12,7 +12,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/itskills/kubedrill/internal/sim"
+	"github.com/itdrills/kubedrill/internal/sim"
 )
 
 const token = "test-token"
@@ -40,7 +40,7 @@ func do(t *testing.T, ts *httptest.Server, method, path, contentType, body strin
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	b, _ := io.ReadAll(resp.Body)
 	return resp.StatusCode, string(b)
 }
@@ -228,14 +228,14 @@ func TestWatch(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	go func() {
 		req, _ := http.NewRequest("POST", ts.URL+"/api/v1/namespaces/default/configmaps",
 			strings.NewReader(`{"apiVersion":"v1","kind":"ConfigMap","metadata":{"name":"w"},"data":{"a":"b"}}`))
 		req.Header.Set("Authorization", "Bearer "+token)
 		req.Header.Set("Content-Type", "application/json")
 		if resp, err := http.DefaultClient.Do(req); err == nil {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 		}
 	}()
 	sc := bufio.NewScanner(resp.Body)

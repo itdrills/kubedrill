@@ -103,7 +103,7 @@ needed for the MVP; the store interface allows swapping persistence later.
   columns + (optional) controller.
 - `sim.Cluster` public methods (`Create`, `Mutate`, `Update`, `Delete`, `Logs`,
   `WithLock`/`Tx`, `Snapshot`/`Restore`) – used by the API and the scenario engine.
-- Scenario YAML `itskills.github.io/v1alpha1` – versioned; breaking changes get a new version.
+- Scenario YAML `itdrills.github.io/v1alpha1` – versioned; breaking changes get a new version.
 - Admin API `/kubedrill/v1/...` – JSON, used by the CLI and later by integrations
   (e.g. learning platforms).
 
@@ -115,12 +115,12 @@ needed for the MVP; the store interface allows swapping persistence later.
   (development only).
 - `.goreleaser.yaml` builds the same matrix for tagged releases: tarballs,
   `.deb` and `.rpm` (nfpm; rpm signed with the release GPG key), the GitHub
-  release and a Homebrew cask in `itskills/homebrew-tap`. `make snapshot` runs
+  release and a Homebrew cask in `itdrills/homebrew-tap`. `make snapshot` runs
   the whole pipeline locally without publishing.
 - `scripts/publish-repos.sh` turns the packages into a signed apt repository
   (`apt-ftparchive`, InRelease/Release.gpg) and a dnf repository (`createrepo_c`,
   signed `repomd.xml`) on the `gh-pages` branch, served at
-  https://itskills.github.io/kubedrill/. Setup: [releasing.md](releasing.md).
+  https://itdrills.github.io/kubedrill/. Setup: [releasing.md](releasing.md).
 - **Gatekeeper**: Go's linker ad-hoc signs darwin/arm64 binaries. Locally built or
   `file://`-installed binaries are not quarantined. For public downloads, sign
   with a Developer ID Application certificate and notarize (GoReleaser's

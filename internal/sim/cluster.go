@@ -19,8 +19,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/itskills/kubedrill/internal/registry"
-	"github.com/itskills/kubedrill/internal/store"
+	"github.com/itdrills/kubedrill/internal/registry"
+	"github.com/itdrills/kubedrill/internal/store"
 )
 
 // State is the simulation-internal state that is not visible as Kubernetes

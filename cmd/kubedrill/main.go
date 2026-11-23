@@ -6,7 +6,7 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"github.com/itskills/kubedrill/internal/cli"
+	"github.com/itdrills/kubedrill/internal/cli"
 )
 
 // version is set by release builds via -ldflags "-X main.version=...".
@@ -18,7 +18,7 @@ func main() {
 }
 
 // resolveVersion falls back to the module version recorded by
-// `go install github.com/itskills/kubedrill/cmd/kubedrill@vX.Y.Z`.
+// `go install github.com/itdrills/kubedrill/cmd/kubedrill@vX.Y.Z`.
 func resolveVersion() string {
 	if version != "dev" {
 		return version
