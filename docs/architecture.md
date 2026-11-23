@@ -15,6 +15,7 @@ internal/store         in-memory typed object store, resourceVersions, watch, sn
 internal/registry      served resources (GVR, kind, scope, short names, categories)
 internal/scenario      scenario format, validation, engine, success criteria
 internal/kubeconfig    standalone kubeconfig + safe merge into the user's kubeconfig
+internal/ui            `kubedrill ui`: loopback web page (embedded assets), token + host/origin checks, command allowlist (no shell)
 test/e2e               real kubectl against a real kubedrill process (build tag e2e)
 ```
 

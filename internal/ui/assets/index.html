@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KubeDrill</title>
+<link rel="stylesheet" href="style.css">
+<script src="app.js" defer></script>
+</head>
+<body>
+<header>
+  <strong>KubeDrill</strong>
+  <span class="claim">Practice Kubernetes. No Cluster Required.</span>
+  <span id="status" class="pill">connecting…</span>
+</header>
+<main>
+  <section id="terminal" aria-label="Terminal">
+    <pre id="output" aria-live="polite"></pre>
+    <form id="prompt" autocomplete="off">
+      <label for="line">$</label>
+      <input id="line" name="line" spellcheck="false" autocapitalize="off" autofocus
+             placeholder="kubectl get pods" aria-label="Command">
+    </form>
+    <p class="note">Only <code>kubectl …</code> and <code>kubedrill challenge|hint|solve|status</code> run here.
+      Pipes and other shell features need your own terminal. ↑/↓ for history.</p>
+  </section>
+  <aside id="panel" aria-label="Challenge">
+    <div id="no-challenge">
+      <h2>Challenges</h2>
+      <p>Pick one: KubeDrill injects a fault into the simulated cluster, you find and fix it.</p>
+      <ul id="catalog"></ul>
+    </div>
+    <div id="challenge" hidden>
+      <h2 id="ch-title"></h2>
+      <p class="meta"><span id="ch-difficulty"></span> · <span id="ch-hints"></span></p>
+      <pre id="ch-description"></pre>
+      <h3>Success criteria</h3>
+      <ul id="ch-criteria"></ul>
+      <div class="buttons">
+        <button type="button" data-run="kubedrill hint">Hint</button>
+        <button type="button" data-run="kubedrill challenge check" class="primary">Check</button>
+        <button type="button" data-run="kubedrill challenge reset">Reset</button>
+        <button type="button" data-run="kubedrill solve" data-confirm="Show the solution? The challenge then counts as completed with help.">Solve</button>
+        <button type="button" data-run="kubedrill challenge stop">Stop</button>
+      </div>
+    </div>
+  </aside>
+</main>
+</body>
+</html>
