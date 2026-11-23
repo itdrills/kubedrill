@@ -1,0 +1,83 @@
+apiVersion: itskills.github.io/v1alpha1
+kind: Scenario
+metadata:
+  id: crashloop-missing-env
+  title: "CrashLoopBackOff: the API exits right after starting"
+  difficulty: beginner
+  estimatedMinutes: 10
+  tags: [pods, logs, configuration]
+  version: "1"
+spec:
+  summary: An application crashes on start because a required environment variable is missing.
+  description: |
+    The team deployed "orders-api" to namespace "default". Its pods keep
+    restarting and the API is never available.
+
+    Diagnose the crash and fix the Deployment. Hint: containers write logs even
+    if they only live for a second. Run `kubedrill challenge check` when done.
+  namespace: default
+  setup: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: orders-db
+    type: Opaque
+    stringData:
+      url: postgres://orders:not-a-real-password@orders-db.default.svc:5432/orders
+    ---
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: orders-api
+      labels:
+        app: orders-api
+    spec:
+      replicas: 2
+      selector:
+        matchLabels:
+          app: orders-api
+      template:
+        metadata:
+          labels:
+            app: orders-api
+        spec:
+          containers:
+          - name: api
+            image: kubedrill/demo-api:1.4
+            ports:
+            - containerPort: 8080
+  hints:
+    - "Check the pod status and the RESTARTS column: `kubectl get pods -l app=orders-api`."
+    - "A crashing container's output is in its logs. Use `kubectl logs <pod>` — and `kubectl logs <pod> --previous` for the last crashed run."
+    - "The log says DATABASE_URL is not set. Is there something in the namespace that holds a database URL? Try `kubectl get secrets` and `kubectl describe secret orders-db`."
+    - "Add the variable from the secret: `kubectl set env deployment/orders-api --from=secret/orders-db --prefix=DATABASE_` creates DATABASE_URL from the key `url`. Then watch `kubectl get pods -w`."
+  success:
+    - type: deploymentAvailable
+      name: orders-api
+      description: "Deployment orders-api is available with all replicas"
+    - type: podsReady
+      selector: app=orders-api
+      min: 2
+      description: "All orders-api pods are Ready (no CrashLoopBackOff)"
+  solution:
+    diagnosis: |
+      The pods show CrashLoopBackOff with a growing RESTARTS count. `kubectl logs
+      <pod> --previous` prints "FATAL: required environment variable DATABASE_URL is
+      not set" and the container exits with code 1 (see Last State in describe).
+    rootCause: |
+      The container image requires the DATABASE_URL environment variable. The
+      Deployment does not set it, so the process exits immediately and the kubelet
+      restarts it with an increasing back-off.
+    fix: |
+      Provide DATABASE_URL to the container, ideally from the existing Secret
+      "orders-db" (key "url") using valueFrom.secretKeyRef or envFrom.
+    commands:
+      - kubectl logs deploy/orders-api --previous
+      - kubectl set env deployment/orders-api --from=secret/orders-db --prefix=DATABASE_
+      - kubectl rollout status deployment/orders-api
+  explanation: |
+    CrashLoopBackOff is not an error by itself: it is the kubelet waiting before
+    restarting a container that keeps exiting. The reason is almost always in the
+    logs of the previous run (`--previous`) and in "Last State" of `kubectl describe`.
+    Exit code 1 is an application error; 137 usually means the container was killed
+    (OOMKilled or a failed liveness probe).

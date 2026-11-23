@@ -1,0 +1,72 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Unit and API tests
+        run: make test
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: v1.37.1
+      - name: End-to-end tests with real kubectl
+        run: make e2e
+      - name: Smoke test
+        run: make build && make smoke-test SMOKE_BINARY="$PWD/bin/kubedrill"
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: gofmt and go vet
+        run: make vet && test -z "$(gofmt -l cmd internal test)"
+      - uses: golangci/golangci-lint-action@v8
+        with:
+          version: latest
+
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: GoReleaser config check and snapshot (archives, .deb, .rpm, cask)
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: "~> v2"
+          args: release --snapshot --clean
+        env:
+          HOMEBREW_TAP_GITHUB_TOKEN: unused
+      - name: Install the .deb and run the packaged binary
+        run: |
+          sudo apt-get install -y ./dist/kubedrill_*_amd64.deb
+          kubedrill version
+          sudo apt-get remove -y kubedrill
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/

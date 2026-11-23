@@ -1,0 +1,133 @@
+# GoReleaser configuration (v2). Releases are built by .github/workflows/release.yml
+# when a tag v* is pushed. Local dry run without publishing:
+#   go run github.com/goreleaser/goreleaser/v2@latest release --snapshot --clean
+# See docs/releasing.md for the one-time setup (tap repository, secrets, Pages).
+version: 2
+
+project_name: kubedrill
+
+before:
+  hooks:
+    - go mod tidy
+    - go test ./...
+
+builds:
+  - id: kubedrill
+    main: ./cmd/kubedrill
+    binary: kubedrill
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w -X main.version={{ .Version }}
+    goos: [darwin, linux]
+    goarch: [arm64, amd64]
+
+archives:
+  - formats: [tar.gz]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - LICENSE
+      - README.md
+
+checksum:
+  name_template: checksums.txt
+
+# Linux packages. The apt and dnf repositories on GitHub Pages are built from
+# these files by scripts/publish-repos.sh (see release.yml).
+nfpms:
+  - id: packages
+    package_name: kubedrill
+    file_name_template: "{{ .ConventionalFileName }}"
+    formats: [deb, rpm]
+    vendor: ITSkills
+    homepage: https://github.com/itskills/kubedrill
+    maintainer: "ITSkills maintainers (https://github.com/itskills/kubedrill/issues)"
+    description: |-
+      Local Kubernetes simulator: practice kubectl without a cluster.
+      Use the real kubectl against a simulated cluster (no containers, no VMs)
+      and train troubleshooting with built-in challenges, hints and checks.
+    license: Apache-2.0
+    section: devel
+    bindir: /usr/bin
+    # kubectl is not part of the Debian/Fedora base repositories everywhere,
+    # so it is only suggested; `kubedrill doctor` explains how to install it.
+    suggests:
+      - kubectl
+    contents:
+      - src: LICENSE
+        dst: /usr/share/doc/kubedrill/LICENSE
+      - src: README.md
+        dst: /usr/share/doc/kubedrill/README.md
+    rpm:
+      summary: Local Kubernetes simulator for practising kubectl
+      group: Development/Tools
+      signature:
+        # Set in release.yml from the GPG_PRIVATE_KEY secret; empty = unsigned
+        # (local snapshot builds). Passphrase: $NFPM_PASSPHRASE.
+        key_file: '{{ if index .Env "GPG_KEY_FILE" }}{{ .Env.GPG_KEY_FILE }}{{ end }}'
+
+# Homebrew cask in https://github.com/itskills/homebrew-tap
+#   brew install itskills/tap/kubedrill
+homebrew_casks:
+  - name: kubedrill
+    repository:
+      owner: itskills
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    directory: Casks
+    homepage: https://github.com/itskills/kubedrill
+    description: "Local Kubernetes simulator: practice kubectl without a cluster"
+    license: Apache-2.0
+    binaries: [kubedrill]
+    commit_author:
+      name: itskills-release-bot
+      email: kubedrill-release@users.noreply.github.com
+    # kubectl is deliberately not a dependency: many users manage it with other
+    # tools (asdf, mise, gcloud, Docker Desktop). `kubedrill doctor` checks it.
+    caveats: |
+      kubedrill talks to the real kubectl (`brew install kubectl` if you have none).
+        kubedrill start
+        kubectl --context kubedrill get nodes
+        kubedrill challenge list
+      kubedrill adds a "kubedrill" context to your kubeconfig but never changes your
+      current-context. `kubedrill kubectl ...` always targets the simulator.
+    hooks:
+      post:
+        # The binaries are not signed/notarized yet: remove the quarantine
+        # attribute Homebrew sets on downloaded casks so macOS runs it.
+        install_steps: |
+          on_macos do
+            run "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "{{ .StagedPath }}/kubedrill"]
+          end
+
+release:
+  github:
+    owner: itskills
+    name: kubedrill
+  footer: |
+    ## Install
+
+    ```sh
+    brew install itskills/tap/kubedrill          # macOS
+    ```
+    apt (Debian/Ubuntu) and dnf (Fedora/RHEL): see https://itskills.github.io/kubedrill/
+
+changelog:
+  use: github
+  sort: asc
+  filters:
+    exclude: ["^docs:", "^test:", "^chore:"]
+
+# Signing/notarization for macOS (enable once a Developer ID certificate exists).
+# notarize:
+#   macos:
+#     - enabled: '{{ isEnvSet "MACOS_SIGN_P12" }}'
+#       sign:
+#         certificate: "{{ .Env.MACOS_SIGN_P12 }}"
+#         password: "{{ .Env.MACOS_SIGN_PASSWORD }}"
+#       notarize:
+#         issuer_id: "{{ .Env.MACOS_NOTARY_ISSUER_ID }}"
+#         key_id: "{{ .Env.MACOS_NOTARY_KEY_ID }}"
+#         key: "{{ .Env.MACOS_NOTARY_KEY }}"

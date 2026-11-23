@@ -1,0 +1,91 @@
+apiVersion: itskills.github.io/v1alpha1
+kind: Scenario
+metadata:
+  id: image-pull-backoff
+  title: "Rollout stuck: the new image cannot be pulled"
+  difficulty: beginner
+  estimatedMinutes: 10
+  tags: [deployments, images, rollout]
+  version: "1"
+spec:
+  summary: A deployment update references an image tag that does not exist.
+  description: |
+    A colleague just rolled out a new version of the Deployment
+    "{{target.name}}" in namespace "{{target.namespace}}".
+    The rollout never finishes and one pod is not starting.
+
+    Find out why and repair the Deployment with ordinary kubectl commands.
+    When you think it is fixed, run `kubedrill challenge check`.
+  namespace: default
+  target:
+    kind: Deployment
+  setup: |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: web
+      labels:
+        app: web
+    spec:
+      replicas: 3
+      selector:
+        matchLabels:
+          app: web
+      template:
+        metadata:
+          labels:
+            app: web
+        spec:
+          containers:
+          - name: web
+            image: nginx:1.27
+            ports:
+            - containerPort: 80
+  inject:
+    patch:
+    - op: replace
+      path: /spec/template/spec/containers/0/image
+      value: nginx:1.27-doesnotexist
+  hints:
+    - "Start broad: `kubectl get deployments,pods -n {{target.namespace}}`. Which pod is not Running, and what does its STATUS say?"
+    - "Look at the events of the failing pod: `kubectl describe pod <pod-name> -n {{target.namespace}}` and read the Events section at the bottom."
+    - "The events say the image could not be pulled because the tag does not exist. Check which image the Deployment uses: `kubectl get deployment {{target.name}} -n {{target.namespace}} -o jsonpath='{.spec.template.spec.containers[0].image}'`."
+    - "Set a valid image, e.g. `kubectl set image deployment/{{target.name}} <container>=nginx:1.27 -n {{target.namespace}}` (or `kubectl rollout undo deployment/{{target.name}}`), then watch `kubectl rollout status deployment/{{target.name}}`."
+  success:
+    - type: deploymentAvailable
+      name: "{{target.name}}"
+      namespace: "{{target.namespace}}"
+      description: "Deployment {{target.name}} is fully rolled out and all replicas are available"
+    - type: field
+      kind: Deployment
+      name: "{{target.name}}"
+      namespace: "{{target.namespace}}"
+      path: /spec/template/spec/containers/0/image
+      notEquals: nginx:1.27-doesnotexist
+      description: "The Deployment no longer references the non-existent image tag"
+  solution:
+    diagnosis: |
+      `kubectl get pods` shows a new pod in ErrImagePull / ImagePullBackOff while the
+      old pods keep running. `kubectl describe pod` shows events like
+      "Failed to pull image "nginx:1.27-doesnotexist": ... not found" followed by
+      "Back-off pulling image".
+    rootCause: |
+      The pod template of the Deployment references the tag "nginx:1.27-doesnotexist",
+      which does not exist in the registry. The new ReplicaSet can never become
+      available, so the rolling update stalls (maxUnavailable keeps the old pods alive).
+    fix: |
+      Point the Deployment back to a valid image tag, or roll back to the previous
+      revision. The Deployment controller then finishes the rollout.
+    commands:
+      - kubectl describe pod -n {{target.namespace}} -l <selector>
+      - kubectl set image deployment/{{target.name}} <container>=nginx:1.27 -n {{target.namespace}}
+      - kubectl rollout status deployment/{{target.name}} -n {{target.namespace}}
+      - "# alternative: kubectl rollout undo deployment/{{target.name}} -n {{target.namespace}}"
+  explanation: |
+    ImagePullBackOff means the kubelet tried to pull the image, failed, and now waits
+    with an exponential back-off (10s, 20s, 40s ... up to 5 minutes) before retrying.
+    Typical causes are typos in the image name or tag, deleted tags, private
+    registries without imagePullSecrets, and registry rate limits. Rolling updates
+    protect you here: the old ReplicaSet keeps serving until new pods are available.
+  reset:
+    strategy: snapshot

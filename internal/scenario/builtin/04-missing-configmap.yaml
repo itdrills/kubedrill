@@ -1,0 +1,81 @@
+apiVersion: itskills.github.io/v1alpha1
+kind: Scenario
+metadata:
+  id: missing-configmap
+  title: "CreateContainerConfigError: missing ConfigMap"
+  difficulty: beginner
+  estimatedMinutes: 8
+  tags: [configmaps, configuration, pods]
+  version: "1"
+spec:
+  summary: A Deployment references a ConfigMap that does not exist.
+  description: |
+    The "reporting" Deployment in namespace "default" was applied, but its pod
+    never starts. The team says the configuration should set LOG_LEVEL to "info"
+    and REPORT_SCHEDULE to "0 6 * * *".
+
+    Get the pod running and run `kubedrill challenge check`.
+  namespace: default
+  setup: |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: reporting
+      labels:
+        app: reporting
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: reporting
+      template:
+        metadata:
+          labels:
+            app: reporting
+        spec:
+          containers:
+          - name: reporting
+            image: nginx:1.27
+            env:
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: reporting-config
+                  key: LOG_LEVEL
+            - name: REPORT_SCHEDULE
+              valueFrom:
+                configMapKeyRef:
+                  name: reporting-config
+                  key: REPORT_SCHEDULE
+  hints:
+    - "What is the STATUS of the reporting pod? `kubectl get pods -l app=reporting`."
+    - "`kubectl describe pod -l app=reporting --show-events=true` — the Events explain which configuration object is missing."
+    - "Create the ConfigMap with both keys: `kubectl create configmap reporting-config --from-literal=LOG_LEVEL=info --from-literal=REPORT_SCHEDULE='0 6 * * *'`. The kubelet retries automatically."
+  success:
+    - type: exists
+      kind: ConfigMap
+      name: reporting-config
+      description: "ConfigMap reporting-config exists"
+    - type: deploymentAvailable
+      name: reporting
+      description: "Deployment reporting is available"
+  solution:
+    diagnosis: |
+      The pod is stuck in CreateContainerConfigError. Its events show
+      "Error: configmap "reporting-config" not found".
+    rootCause: |
+      Environment variables are taken from the ConfigMap "reporting-config" via
+      configMapKeyRef, but the ConfigMap was never created. The kubelet cannot build
+      the container configuration and does not start the container.
+    fix: |
+      Create the ConfigMap with the keys LOG_LEVEL and REPORT_SCHEDULE. No restart is
+      required: the kubelet retries and starts the container once the ConfigMap exists.
+    commands:
+      - kubectl describe pod -l app=reporting --show-events=true
+      - kubectl create configmap reporting-config --from-literal=LOG_LEVEL=info --from-literal="REPORT_SCHEDULE=0 6 * * *"
+      - kubectl get pods -l app=reporting
+  explanation: |
+    Missing ConfigMaps/Secrets referenced from env cause CreateContainerConfigError;
+    missing ones mounted as volumes leave the pod in ContainerCreating with
+    FailedMount events. Mark references as `optional: true` only when the
+    application really works without them.

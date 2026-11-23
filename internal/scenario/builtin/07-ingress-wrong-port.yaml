@@ -1,0 +1,109 @@
+apiVersion: itskills.github.io/v1alpha1
+kind: Scenario
+metadata:
+  id: ingress-wrong-port
+  title: "Ingress returns 503: backend port mismatch"
+  difficulty: intermediate
+  estimatedMinutes: 10
+  tags: [ingress, services, networking]
+  version: "1"
+spec:
+  summary: An Ingress points to a Service port that does not exist.
+  description: |
+    The web shop is published via the Ingress "shop" in namespace "default"
+    (host shop.local). The pods are Running and the Ingress has an address,
+    but every request through the Ingress fails with 503 Service Unavailable.
+
+    Find out why the ingress controller cannot reach the shop and fix it.
+    Run `kubedrill challenge check` when done.
+  namespace: default
+  setup: |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: shop
+      labels:
+        app: shop
+    spec:
+      replicas: 2
+      selector:
+        matchLabels:
+          app: shop
+      template:
+        metadata:
+          labels:
+            app: shop
+        spec:
+          containers:
+          - name: nginx
+            image: nginx:1.27
+            ports:
+            - name: http
+              containerPort: 80
+    ---
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: shop
+      labels:
+        app: shop
+    spec:
+      selector:
+        app: shop
+      ports:
+      - name: http
+        port: 80
+        targetPort: http
+    ---
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: shop
+    spec:
+      ingressClassName: nginx
+      rules:
+      - host: shop.local
+        http:
+          paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: shop
+                port:
+                  number: 8080
+  hints:
+    - "Start at the entry point: `kubectl get ingress shop` and `kubectl describe ingress shop`. Which Service and port does the rule forward to?"
+    - "Look at what the ingress controller reports: `kubectl get events --field-selector involvedObject.kind=Ingress` or `kubectl logs -n ingress-nginx deploy/ingress-nginx-controller`. Then compare with `kubectl get service shop`."
+    - "The Ingress forwards to port 8080, but the Service only exposes port 80. Fix the backend: `kubectl patch ingress shop --type=json -p '[{\"op\":\"replace\",\"path\":\"/spec/rules/0/http/paths/0/backend/service/port/number\",\"value\":80}]'` (or `kubectl edit ingress shop`)."
+  success:
+    - type: ingressReady
+      name: shop
+      description: "Ingress shop routes to a Service port with ready endpoints"
+    - type: serviceHasEndpoints
+      name: shop
+      min: 2
+      description: "Service shop still has both shop pods as endpoints"
+  solution:
+    diagnosis: |
+      `kubectl describe ingress shop` shows the rule shop.local / -> shop:8080. The
+      Warning event ServicePortNotFound (and the controller log) says:
+      Service "default/shop" does not have any port 8080 (ports: http=80).
+    rootCause: |
+      An Ingress backend references a *Service* port (spec.ports[].port or its
+      name), not the container port. The Service exposes 80, so the controller
+      has no upstream for 8080 and answers 503.
+    fix: |
+      Point the backend to the Service port 80 (or to the port name "http").
+      Changing the Service to expose 8080 would work as well.
+    commands:
+      - kubectl describe ingress shop
+      - kubectl get service shop
+      - "kubectl patch ingress shop --type=json -p '[{\"op\":\"replace\",\"path\":\"/spec/rules/0/http/paths/0/backend/service/port/number\",\"value\":80}]'"
+      - kubectl describe ingress shop
+  explanation: |
+    Traffic flows Ingress -> Service port -> targetPort -> container port. Each hop
+    references the next by number or name, and a mismatch at any hop breaks the
+    chain without the pods ever noticing. Debug from the outside in: Ingress
+    backend, Service ports, Endpoints, container ports. Prefer named ports
+    ("http") to keep the hops in sync.

@@ -1,0 +1,94 @@
+apiVersion: itskills.github.io/v1alpha1
+kind: Scenario
+metadata:
+  id: readiness-probe
+  title: "Running but never Ready: failing readiness probe"
+  difficulty: intermediate
+  estimatedMinutes: 12
+  tags: [probes, services, pods]
+  version: "1"
+spec:
+  summary: A readiness probe checks a path the application does not serve.
+  description: |
+    The "catalog" API in namespace "default" is Running, but `kubectl get pods`
+    shows 0/1 READY and the Service "catalog" sends no traffic to it.
+
+    The application documents its health endpoints as /healthz (liveness) and
+    /ready (readiness) on port 8080. Fix the problem and run
+    `kubedrill challenge check`.
+  namespace: default
+  setup: |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: catalog
+      labels:
+        app: catalog
+    spec:
+      replicas: 2
+      selector:
+        matchLabels:
+          app: catalog
+      template:
+        metadata:
+          labels:
+            app: catalog
+        spec:
+          containers:
+          - name: catalog
+            image: kubedrill/demo-api:1.4
+            env:
+            - name: DATABASE_URL
+              value: postgres://catalog@catalog-db:5432/catalog
+            ports:
+            - name: http
+              containerPort: 8080
+            readinessProbe:
+              httpGet:
+                path: /health
+                port: http
+              periodSeconds: 5
+    ---
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: catalog
+    spec:
+      selector:
+        app: catalog
+      ports:
+      - port: 80
+        targetPort: http
+  hints:
+    - "Pods are Running but not Ready. Which component decides readiness? Look at `kubectl describe pod -l app=catalog --show-events=true`."
+    - "The events contain `Readiness probe failed: HTTP probe failed with statuscode: 404`. Which path does the probe request?"
+    - "Change the probe path to /ready, e.g. `kubectl patch deployment catalog --type=json -p '[{\"op\":\"replace\",\"path\":\"/spec/template/spec/containers/0/readinessProbe/httpGet/path\",\"value\":\"/ready\"}]'`."
+  success:
+    - type: deploymentAvailable
+      name: catalog
+      description: "Deployment catalog is available"
+    - type: serviceHasEndpoints
+      name: catalog
+      min: 2
+      description: "Service catalog has 2 ready endpoints"
+  solution:
+    diagnosis: |
+      The pods are Running with READY 0/1. `kubectl describe pod` shows repeated
+      "Readiness probe failed: HTTP probe failed with statuscode: 404" events, and
+      `kubectl get endpoints catalog` lists the pod IPs only as not-ready addresses.
+    rootCause: |
+      The readinessProbe requests /health, but the application only serves /healthz
+      and /ready. The kubelet marks the containers unready and the endpoints
+      controller removes them from the Service.
+    fix: |
+      Set readinessProbe.httpGet.path to /ready. The Deployment rolls out new pods
+      whose probes succeed, and the Service gets ready endpoints.
+    commands:
+      - kubectl describe pod -l app=catalog --show-events=true
+      - "kubectl patch deployment catalog --type=json -p '[{\"op\":\"replace\",\"path\":\"/spec/template/spec/containers/0/readinessProbe/httpGet/path\",\"value\":\"/ready\"}]'"
+      - kubectl rollout status deployment/catalog
+      - kubectl get endpoints catalog
+  explanation: |
+    Readiness probes gate traffic, liveness probes restart containers. A failing
+    readiness probe never restarts anything — the pod just silently stops receiving
+    traffic, which is why "Running but 0/1" is a classic symptom.

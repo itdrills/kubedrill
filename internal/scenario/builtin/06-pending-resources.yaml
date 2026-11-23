@@ -1,0 +1,75 @@
+apiVersion: itskills.github.io/v1alpha1
+kind: Scenario
+metadata:
+  id: pending-resources
+  title: "Pending forever: insufficient resources"
+  difficulty: intermediate
+  estimatedMinutes: 10
+  tags: [scheduling, resources, pods]
+  version: "1"
+spec:
+  summary: Pods request more memory than any node can offer.
+  description: |
+    The "analytics" Deployment in namespace "default" was created an hour ago,
+    but its pods are still Pending. The application needs about 256Mi of memory
+    and 250m CPU.
+
+    Find out why the pods are not scheduled and fix it.
+    Run `kubedrill challenge check` when done.
+  namespace: default
+  setup: |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: analytics
+      labels:
+        app: analytics
+    spec:
+      replicas: 2
+      selector:
+        matchLabels:
+          app: analytics
+      template:
+        metadata:
+          labels:
+            app: analytics
+        spec:
+          containers:
+          - name: worker
+            image: nginx:1.27
+            resources:
+              requests:
+                cpu: 250m
+                memory: 12Gi
+              limits:
+                memory: 12Gi
+  hints:
+    - "Pending means the scheduler has not placed the pod yet. `kubectl describe pod -l app=analytics --show-events=true` shows why."
+    - "The FailedScheduling event says `Insufficient memory`. Compare the pod's requests with the nodes: `kubectl describe nodes | grep -A5 Allocatable`."
+    - "Lower the requests and limits: `kubectl set resources deployment analytics --requests=cpu=250m,memory=256Mi --limits=memory=512Mi`."
+  success:
+    - type: deploymentAvailable
+      name: analytics
+      description: "Deployment analytics is available with all replicas"
+  solution:
+    diagnosis: |
+      The pods are Pending without a node. The FailedScheduling event reads
+      "0/3 nodes are available: 1 node(s) had untolerated taint
+      {node-role.kubernetes.io/control-plane: }, 2 Insufficient memory".
+    rootCause: |
+      Each pod requests 12Gi of memory, but the worker nodes only have about 4Gi
+      allocatable. The scheduler only places pods on nodes where the sum of requests
+      fits; the control-plane node is tainted and therefore excluded too.
+    fix: |
+      Reduce the memory request (and limit) to what the application needs, e.g.
+      256Mi request / 512Mi limit. New pods are scheduled immediately.
+    commands:
+      - kubectl describe pod -l app=analytics --show-events=true
+      - kubectl describe nodes
+      - kubectl set resources deployment analytics --requests=cpu=250m,memory=256Mi --limits=memory=512Mi
+      - kubectl rollout status deployment/analytics
+  explanation: |
+    Scheduling uses requests, not actual usage. Requests that exceed the
+    allocatable capacity of every node keep pods Pending forever (unless the
+    cluster autoscaler adds bigger nodes). Limits below the real usage cause the
+    opposite problem: OOMKilled containers.

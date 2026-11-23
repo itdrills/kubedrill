@@ -1,0 +1,37 @@
+# Homebrew formula template for KubeDrill.
+#
+# Local use: `make brew-local-install` renders this template with a file://
+# URL to the tarball built by `make package` and installs it through a local
+# tap. For public releases GoReleaser publishes a formula to a tap repository
+# (see .goreleaser.yaml). `brew install kubedrill` without a tap only works once
+# the package is accepted into homebrew-core, which is not the case today.
+class Kubedrill < Formula
+  desc "Local Kubernetes simulator: practice kubectl without a cluster"
+  homepage "https://github.com/itskills/kubedrill"
+  version "@VERSION@"
+  url "@URL@"
+  sha256 "@SHA256@"
+  license "Apache-2.0"
+
+  def install
+    bin.install "kubedrill"
+  end
+
+  def caveats
+    <<~EOS
+      kubedrill talks to the real kubectl (install it with `brew install kubectl`).
+
+        kubedrill start
+        kubectl --context kubedrill get nodes
+
+      kubedrill adds a "kubedrill" context to your kubeconfig but never changes your
+      current-context. `kubedrill kubectl ...` always targets the simulator.
+    EOS
+  end
+
+  test do
+    assert_match version.to_s, shell_output("#{bin}/kubedrill version")
+    ENV["KUBEDRILL_HOME"] = (testpath/"home").to_s
+    assert_match "stopped", shell_output("#{bin}/kubedrill status")
+  end
+end

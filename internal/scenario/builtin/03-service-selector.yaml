@@ -1,0 +1,89 @@
+apiVersion: itskills.github.io/v1alpha1
+kind: Scenario
+metadata:
+  id: service-selector
+  title: "Service without endpoints"
+  difficulty: beginner
+  estimatedMinutes: 8
+  tags: [services, labels, networking]
+  version: "1"
+spec:
+  summary: A Service selector does not match the labels of the pods it should route to.
+  description: |
+    The pods of "shop-frontend" are Running and Ready, but requests to the
+    Service "shop-frontend" in namespace "default" fail: nobody answers.
+
+    Find out why the Service does not route traffic and fix it.
+    Run `kubedrill challenge check` when done.
+  namespace: default
+  setup: |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: shop-frontend
+      labels:
+        app: shop-frontend
+    spec:
+      replicas: 2
+      selector:
+        matchLabels:
+          app: shop-frontend
+      template:
+        metadata:
+          labels:
+            app: shop-frontend
+            tier: web
+        spec:
+          containers:
+          - name: nginx
+            image: nginx:1.27
+            ports:
+            - containerPort: 80
+              name: http
+    ---
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: shop-frontend
+      labels:
+        app: shop-frontend
+    spec:
+      selector:
+        app: shop-frontnd
+      ports:
+      - name: http
+        port: 80
+        targetPort: http
+  hints:
+    - "A Service forwards traffic to its endpoints. Look at them: `kubectl get endpoints shop-frontend` (or `kubectl describe service shop-frontend`)."
+    - "No endpoints means the selector matches no Ready pod. Compare `kubectl get service shop-frontend -o wide` (SELECTOR column) with `kubectl get pods --show-labels`."
+    - "There is a typo in the Service selector. Fix it with `kubectl edit service shop-frontend` or `kubectl patch service shop-frontend -p '{\"spec\":{\"selector\":{\"app\":\"shop-frontend\"}}}'`."
+  success:
+    - type: serviceHasEndpoints
+      name: shop-frontend
+      min: 2
+      description: "Service shop-frontend has both frontend pods as ready endpoints"
+    - type: deploymentAvailable
+      name: shop-frontend
+      description: "Deployment shop-frontend is still available"
+  solution:
+    diagnosis: |
+      `kubectl describe service shop-frontend` shows "Endpoints: <none>" (or an empty
+      EndpointSlice). The Service selector is app=shop-frontnd, while the pods carry
+      app=shop-frontend.
+    rootCause: |
+      A typo in spec.selector of the Service. Services select pods only by labels;
+      if nothing matches, kube-proxy has no backends and connections fail.
+    fix: |
+      Correct the selector to app=shop-frontend. The endpoints controller then adds
+      the Ready pods as endpoints immediately.
+    commands:
+      - kubectl get svc shop-frontend -o wide
+      - kubectl get pods --show-labels
+      - "kubectl patch service shop-frontend -p '{\"spec\":{\"selector\":{\"app\":\"shop-frontend\"}}}'"
+      - kubectl get endpoints shop-frontend
+  explanation: |
+    Services, Deployments and NetworkPolicies are glued together by labels. When a
+    Service "does not work", always check its endpoints first: <none> means a
+    selector/label mismatch or no Ready pods; endpoints listed under
+    notReadyAddresses mean the pods exist but fail their readiness probes.
